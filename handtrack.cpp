@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <vector>
 #include <opencv2/video/video.hpp>
+#include "instructions.h"
 using namespace cv;
 using namespace std;
 
@@ -37,7 +38,8 @@ int main(int argc, char** argv)
 
 
      VideoCapture vdo(0);
-     cout<<"Once you read this message, press Enter. A window will open, and you have to place your hand inside the rectangle drawn. Then, press 's' ";
+     //cout<<"Once you read this message, press Enter. A window will open, and you have to place your hand inside the rectangle drawn. Then, press 's' ";
+     instructions();
      getchar();
 
 
@@ -180,12 +182,23 @@ void performfunction()
 
                 double area0=contourArea(contour0[j],false); 
                 if((approxrect0.size()==4)&&(area0>=16000)&&(area0<24000))
-                { if((char)waitKey(30)=='s') cout<<endl<<"Start now"<<endl;
-                  if(mc[j].x>mc[i].x) cout<<"Right"<<endl; 
-                  if(mc[j].x<mc[i].x) cout<<"Left"<<endl;
-                  //if(mc[j].y<mc[i].y) cout<<"Up"<<endl;
-                  //if(mc[j].y>mc[i].y) cout<<"Down"<<endl; 
-                  //Note : uncomment above 2 lines to detect up/down motion
+                { 
+                  if((char)waitKey(30)=='s') 
+                   cout<<endl<<"Start now"<<endl; //testing purpose only
+
+                  if(mc[j].x>mc[i].x) //Right
+                    system("amixer set Master 10%-");
+
+                  if(mc[j].x<mc[i].x) //Left
+                    system("amixer set Master 10%+");
+
+/*                if(mc[j].y<mc[i].y) 
+                   cout<<"Up"<<endl;
+
+                  if(mc[j].y>mc[i].y) 
+                   cout<<"Down"<<endl; */
+
+                  //Note : uncomment above 4 lines of code to detect up/down motion
                 }
                
             }
