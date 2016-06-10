@@ -1,6 +1,7 @@
 //do meanshift program for the backprojected image
 //then detect the red rectangle around the hand
 //find the com of the rect and compare it with the prev com and tell the xdiff and ydiff
+//use the difference to tell whether the hand has moved up/down/right/left
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
@@ -21,7 +22,6 @@ int bins=25; //number of partitions of the range 0-255 ig
 Mat mask,mask0;
 Mat hsvimgnew,hsvimgnew0;
 Mat lower_red_hue_range,upper_red_hue_range,contourimgnew,lower_red_hue_range0,upper_red_hue_range0,contourimgnew0;     
-//Mat drawing=Mat::zeros(mask.size(),CV_8UC3);
 
 Rect window(Point(139,193),Point(280,360));
 vector<vector<Point> > contour,contour0;
@@ -70,7 +70,6 @@ int main(int argc, char** argv)
      mixChannels( &hsvimg0, numberofsources, &hueimg0, numberofdests, ch,                          numberofindexpairs );
  
      //creating trackbar to enter number of bins 
-     //Doubt : Didn't we already declare it?
      namedWindow( "SourceImage", CV_WINDOW_AUTOSIZE );
      int maxsliderposition=180;
      createTrackbar( "Hue", "SourceImage", &bins, maxsliderposition,                                                   histandbackproj );
@@ -101,10 +100,11 @@ void histandbackproj(int, void* )
      calcBackProject( &hueimg, 1, 0, hist, backprojimg, &range, 1, true );
      calcBackProject( &hueimg0, 1, 0, hist0, backprojimg0, &range, 1, true );
  
-     //Drawing histogram//Not drawing for previmg now
+     //Drawing histogram//Not drawing for srcimg0 now
+     //Note : it is not necessary to draw a histogram for this program 
      int width=400,height=400;
      int bin_w=cvRound( (double) width /histsize );
-     Mat histimg=Mat::zeros( width, height, CV_8UC3 );//wats hist then??
+     Mat histimg=Mat::zeros( width, height, CV_8UC3 );
      for( int i=0; i<bins; i++ )
      {
           rectangle( histimg, Point(i*bin_w,height), 
@@ -129,9 +129,9 @@ void histandbackproj(int, void* )
 
      mask=lower_red_hue_range|upper_red_hue_range;
      mask0=lower_red_hue_range0|upper_red_hue_range0;
+
      performfunction();
 
-     //imshow("New",srcimg);
      imshow("Mask",mask);
 
 }
@@ -146,8 +146,7 @@ void performfunction()
 
      Mat drawing=Mat::zeros(mask.size(),CV_8UC3);
      Mat drawing0=Mat::zeros(mask0.size(),CV_8UC3);
-
-//     drawContours(contourimgnew,contour,-1,Scalar(255,255,255),2,8,hierarchy,2,Point());          
+          
      int j;
      vector<Moments> mu(contour.size());
      for(j=0;j<contour.size();j++)
@@ -161,13 +160,13 @@ void performfunction()
      vector<Point2f> mc0(contour0.size());
      for(j=0;j<contour0.size();j++)
           mc0[j]=Point2f(mu0[j].m10/mu0[j].m00,mu0[j].m01/mu0[j].m00);
-    // cout<<contour.size()<<'\t'<<contour0.size()<<endl;
+
      vector<Point> approxrect,approxrect0;
      for(i=0;i<contour.size();i++) 
      {
           approxPolyDP(contour[i],approxrect,arcLength(Mat(contour[i]),true)*0.05,true);
 
-          double area=contourArea(contour[i],false); //cout<<area<<endl;
+          double area=contourArea(contour[i],false); 
           if((approxrect.size()==4)&&(area>=16000)&&(area<24000))
           {
            drawContours(drawing,contour,i,Scalar(0,255,255),2,8,hierarchy,2,Point());
@@ -179,14 +178,16 @@ void performfunction()
            {
                 approxPolyDP(contour0[j],approxrect0,arcLength(Mat(contour0[j]),true)*0.05,true);
 
-                double area0=contourArea(contour0[j],false); //cout<<area<<endl;
+                double area0=contourArea(contour0[j],false); 
                 if((approxrect0.size()==4)&&(area0>=16000)&&(area0<24000))
-                { if(mc[j].x>mc[i].x) cout<<"Right"; 
-                  if(mc[j].x<mc[i].x) cout<<"Left";
-                  if(mc[j].y<mc[i].y) cout<<"Up";
-                  if(mc[j].y>mc[i].y) cout<<"Down"; 
+                { if((char)waitKey(30)=='s') cout<<endl<<"Start now"<<endl;
+                  if(mc[j].x>mc[i].x) cout<<"Right"<<endl; 
+                  if(mc[j].x<mc[i].x) cout<<"Left"<<endl;
+                  //if(mc[j].y<mc[i].y) cout<<"Up"<<endl;
+                  //if(mc[j].y>mc[i].y) cout<<"Down"<<endl; 
+                  //Note : uncomment above 2 lines to detect up/down motion
                 }
-                cout<<endl;
+               
             }
 
           }
