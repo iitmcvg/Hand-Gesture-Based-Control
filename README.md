@@ -11,5 +11,5 @@ OpenCv (used version 3.0.1)
 # Trial
 $ cd Hand-Gesture-Based-Control
 $ make all
-
+$ ./output
 
