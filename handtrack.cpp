@@ -134,7 +134,7 @@ void histandbackproj(int, void* )
 
      performfunction();
 
-     imshow("Mask",mask);
+     imshow("New",srcimg);
 
 }
 
@@ -187,10 +187,10 @@ void performfunction()
                    cout<<endl<<"Start now"<<endl; //testing purpose only
 
                   if(mc[j].x>mc[i].x) //Right
-                    system("amixer set Master 10%-");
+                    system("amixer set Master 50%+");
 
                   if(mc[j].x<mc[i].x) //Left
-                    system("amixer set Master 10%+");
+                    system("amixer set Master 50%-");
 
 /*                if(mc[j].y<mc[i].y) 
                    cout<<"Up"<<endl;
